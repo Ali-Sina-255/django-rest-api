@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404
 
 
+
 class ArticleListCreateApiView(APIView):
     def get(self, request):
         article = Article.objects.all()
@@ -20,7 +21,7 @@ class ArticleListCreateApiView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
 class ArticleDetailApiView(APIView):
@@ -61,6 +62,8 @@ def article_list_api_view(reqeust):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+# SF Pro Display
 
 
 @api_view(["GET", "PUT", "DELETE"])
