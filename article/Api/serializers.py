@@ -1,8 +1,45 @@
 from rest_framework import serializers
-from article.models import Article
+from article.models import Article, Journalist
+from datetime import datetime
+from django.utils.timesince import timesince
+from datetime import date
 
 
-class ArticleSerializer(serializers.Serializer):
+
+class ArticleSerializer(serializers.ModelSerializer):
+    time_since_pub = serializers.SerializerMethodField()
+    # author = serializers.StringRelatedField()
+    # author= JournalistSerializer()
+    class Meta:
+        model = Article
+        fields = '__all__'
+        read_only_fields = ['id', 'created_time', 'updated_time']
+        
+    def get_time_since_pub(self, object):
+        new = datetime.now()
+        published_data = object.published_time   
+        timedalta = timesince(published_data, new)
+        return timedalta
+    
+    def validate_published_time(self, datavalue):
+        today = date.today()
+        if datavalue > today:
+            raise serializers.ValidationError("this is a date that has not come yet!!")
+        return datavalue
+
+class JournalistSerializer(serializers.ModelSerializer):
+    # article = ArticleSerializer(read_only=True, many=True)
+    article = serializers.HyperlinkedRelatedField(
+        many=True, 
+        read_only=True,
+        view_name='article-detail'
+    )
+    class Meta:
+        model = Journalist
+        fields = "__all__"
+
+    
+class ArticleSerializerDefault(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     author = serializers.CharField()
     title = serializers.CharField()
